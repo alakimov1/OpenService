@@ -26,9 +26,26 @@ namespace OpenService.Services.NotificationService
             }
         }
 
+        private string? _getExceptionRecursively(Exception exception)
+        {
+            if (exception==null)
+            {
+                return null;
+            }
+
+            var message = exception.Message + Environment.NewLine;
+
+            if (exception.InnerException != null)
+            {
+                message += _getExceptionRecursively(exception.InnerException);
+            }
+
+            return message;
+        }
+
         public void SendLog(Exception exception)
         {
-            _messageQueue.Enqueue(exception.Message + Environment.NewLine + exception.StackTrace);
+            _messageQueue.Enqueue(_getExceptionRecursively(exception) + exception.StackTrace);
 
             if (_task == null)
             {
